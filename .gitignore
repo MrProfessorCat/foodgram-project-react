@@ -133,5 +133,4 @@ dmypy.json
 
 
 # media files
-
-backend/foodgram/media/posts/*.png
+*.png
