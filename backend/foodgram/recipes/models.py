@@ -67,6 +67,29 @@ class Ingredient(models.Model):
         )
 
 
+class IngredientAmount(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredient_amount',
+        verbose_name='Ингредиент'
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        default=1,
+        validators=(MinValueValidator(1),),
+    )
+
+    class Meta:
+        verbose_name = 'Кол-во ингредиентов'
+        verbose_name_plural = 'Кол-во ингредиентов'
+        # constraints = (
+        #     models.UniqueConstraint(
+        #         fields=('recipe', 'ingredient'),
+        #         name='unique_ingredients_in_recipe'),
+        # )
+
+
 class Recipe(models.Model):
     created = models.DateTimeField(
         auto_now_add=True,
@@ -90,8 +113,7 @@ class Recipe(models.Model):
         related_name='recipes'
     )
     ingredients = models.ManyToManyField(
-        Ingredient,
-        through='IngredientAmount',
+        IngredientAmount,
         verbose_name='Ингредиенты',
         help_text='Укажите ингредиенты'
     )
@@ -119,35 +141,6 @@ class Recipe(models.Model):
         ordering = ('-created',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-
-
-class IngredientAmount(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='ingredient_amount',
-        verbose_name='Рецепт'
-    )
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.DO_NOTHING,
-        related_name='ingredient_amount',
-        verbose_name='Ингредиент'
-    )
-    amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество',
-        default=1,
-        validators=(MinValueValidator(1),),
-    )
-
-    class Meta:
-        verbose_name = 'Кол-во ингредиентов'
-        verbose_name_plural = 'Кол-во ингредиентов'
-        constraints = (
-            models.UniqueConstraint(
-                fields=('recipe', 'ingredient'),
-                name='unique_ingredients_in_recipe'),
-        )
 
 
 class Favourite(models.Model):
