@@ -4,9 +4,7 @@ from django.core.validators import (
 )
 from django.db import models
 
-from .validators import (
-    validate_tag_color, validate_tag_slug
-)
+from .validators import validate_tag_color
 
 
 User = get_user_model()
@@ -29,8 +27,7 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
         verbose_name='slug',
-        help_text='Введите slug',
-        validators=(validate_tag_slug,)
+        help_text='Введите slug'
     )
 
     def __str__(self) -> str:

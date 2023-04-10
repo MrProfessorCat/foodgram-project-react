@@ -1,8 +1,6 @@
-import base64
-
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from rest_framework import serializers, validators
+from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import Tag, Recipe, Ingredient, IngredientAmount
 
@@ -65,12 +63,10 @@ class UserWithRecipesSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
-            'password',
             'is_subscribed',
             'recipes',
             'recipes_count'
         )
-        extra_kwargs = {'password': {'write_only': True}}
 
     def get_is_subscribed(self, obj):
         return True
@@ -133,15 +129,6 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
