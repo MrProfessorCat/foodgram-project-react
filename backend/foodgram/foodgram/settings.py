@@ -143,7 +143,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.User'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -156,6 +156,29 @@ DJOSER = {
         'user': ['api.permissions.IsAuthenticatedAdminAuthorOrReadOnly'],
     },
     'SERIALIZERS': {
+        'user_create': 'api.serializers.CustomUserSerializer',
         'current_user': 'api.serializers.CustomUserSerializer'
+    }
+}
+
+
+MAX_LENGTH_LIMITS = {
+    'user': {
+        'username': 150,
+        'first_name': 150,
+        'last_name': 150,
+        'password': 150
+    },
+    'tag': {
+        'name': 200,
+        'color': 7,
+        'slug': 200
+    },
+    'ingredient': {
+        'name': 200,
+        'measurement_unit': 200
+    },
+    'recipe': {
+        'name': 200
     }
 }
