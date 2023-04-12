@@ -34,7 +34,7 @@ class RecipeAdmin(admin.ModelAdmin):
     filter_vertical = ('tags',)
 
     def num_favourite(self, obj):
-        return obj.favourite.count()
+        return Favourite.objects.filter(recipe=obj).count()
 
 
 @admin.register(Favourite)

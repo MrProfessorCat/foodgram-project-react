@@ -3,27 +3,27 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.conf import settings
 
-from djoser.views import UserViewSet
-from rest_framework import status, viewsets, filters
+from rest_framework import status, viewsets, filters, views
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly, SAFE_METHODS
 )
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from users.models import Follow
 from recipes.models import Tag, Recipe, Ingredient, Favourite, ShoppingCart
 from .serializers import (
     TagSerializer, RecipePostSerializer, RecipeGetSerializer,
-    IngredientSerializer, SimpleRecipeSerializer, CustomUserSerializer,
+    IngredientSerializer, SimpleRecipeSerializer,
     UserWithRecipesSerializer
 )
 from .permissions import (
     IsAdminOrReadOnly, IsAdminAuthorOrReadOnly
 )
+from .filters import RecipeFilter
 
 
 User = get_user_model()
@@ -124,34 +124,28 @@ class ExtraAction:
                 )
 
 
-class CustomUserViewSet(UserViewSet, ExtraAction):
-    queryset = User.objects.order_by('pk')
-    serializer_class = CustomUserSerializer
-    pagination_class = PageNumberPagination
-
-    @action(
-            detail=False, methods=['GET'],
-            permission_classes=(IsAuthenticated,)
-    )
-    def subscriptions(self, request):
+class SubscribtionsView(views.APIView):
+    def get(self, request):
         limit = request.query_params.get('limit')
+        paginator = PageNumberPagination()
         if limit and limit.isdigit() and int(limit) > 0:
-            PageNumberPagination.page_size = limit
-        page = self.paginate_queryset(
+            paginator.page_size = limit
+        page = paginator.paginate_queryset(
             User.objects.prefetch_related('recipes').filter(
-                followings__user=self.request.user).order_by('pk')
+                followings__user=self.request.user).order_by('pk'),
+            request
         )
-        PageNumberPagination.page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         serializer = UserWithRecipesSerializer(
             page, many=True, context=request
         )
-        return self.get_paginated_response(serializer.data)
+        return paginator.get_paginated_response(serializer.data)
 
-    @action(
-        detail=True, methods=['POST', 'DELETE'],
-        permission_classes=(IsAuthenticated,)
-    )
-    def subscribe(self, request, id):
+
+class SubscribeView(views.APIView, ExtraAction):
+    def post(self, request, id):
+        return self.extra_action(request, User, Follow, id)
+
+    def delete(self, request, id):
         return self.extra_action(request, User, Follow, id)
 
 
@@ -164,6 +158,9 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet, ExtraAction):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminAuthorOrReadOnly)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
+    queryset = Recipe.objects.all()
 
     def get_queryset(self):
         queryset = Recipe.objects.select_related('author').order_by('created')
@@ -175,27 +172,6 @@ class RecipeViewSet(viewsets.ModelViewSet, ExtraAction):
         tags = self.request.query_params.getlist('tags')
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
-
-        if self.request.user.is_authenticated:
-            is_favorited = self.request.query_params.get('is_favorited')
-            if is_favorited is not None and is_favorited == '1':
-                queryset = queryset.filter(favourite__user=self.request.user)
-            if is_favorited is not None and is_favorited == '0':
-                queryset = queryset.exclude(favourite__user=self.request.user)
-
-            is_in_shopping_cart = self.request.query_params.get(
-                'is_in_shopping_cart'
-            )
-            if is_in_shopping_cart is not None and is_in_shopping_cart == '1':
-                queryset = queryset.filter(
-                    shoppingcart__user=self.request.user
-                )
-            if is_in_shopping_cart is not None and is_in_shopping_cart == '0':
-                queryset = queryset.exclude(
-                    shoppingcart__user=self.request.user
-                )
-
-        return queryset
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -226,11 +202,11 @@ class RecipeViewSet(viewsets.ModelViewSet, ExtraAction):
     )
     def download_shopping_cart(self, request):
         short_names = {
-            'name': 'recipe__ingredient_amount__ingredient__name',
+            'name': 'recipe__ingredients__ingredient__name',
             'measurement_unit':
-            'recipe__ingredient_amount__ingredient__measurement_unit',
-            'amount': 'recipe__ingredient_amount__amount',
-            'sum_amount': 'recipe__ingredient_amount__amount__sum'
+            'recipe__ingredients__ingredient__measurement_unit',
+            'amount': 'recipe__ingredients__amount',
+            'sum_amount': 'recipe__ingredients__amount__sum'
         }
 
         shopping_carts = request.user.shoppingcart.select_related(

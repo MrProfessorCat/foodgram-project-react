@@ -151,13 +151,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DJOSER = {
     'HIDE_USERS': False,
     'PERMISSIONS': {
-        'user_create': ['users.permissions.CreateUserPermissions'],
         'user_list': ['api.permissions.IsAdminAuthorOrReadOnly'],
         'user': ['api.permissions.IsAuthenticatedAdminAuthorOrReadOnly'],
     },
     'SERIALIZERS': {
-        'user_create': 'api.serializers.CustomUserSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer'
+        'user_create': 'djoser.serializers.UserCreateSerializer',
+        'current_user': 'api.serializers.UserSerializer'
     }
 }
 
