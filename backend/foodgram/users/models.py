@@ -8,31 +8,33 @@ from .validators import only_letters_validator
 
 class User(AbstractUser):
     username = models.CharField(
-        max_length=settings.MAX_LENGTH_LIMITS['user']['username'],
+        max_length=settings.MAX_LENGTH_LIMITS['user'],
         unique=True,
+        error_messages={'unique': 'Пользователь с таким username уже есть'},
         validators=(UnicodeUsernameValidator,),
         verbose_name='Никнейм пользователя',
         help_text='Укажите никнейм'
     )
     email = models.EmailField(
         unique=True,
+        error_messages={'unique': 'Пользователь с таким email уже есть'},
         verbose_name='Электронная почта',
         help_text='Укажите электронную почту'
     )
     first_name = models.CharField(
-        max_length=settings.MAX_LENGTH_LIMITS['user']['first_name'],
+        max_length=settings.MAX_LENGTH_LIMITS['user'],
         verbose_name='Имя',
         help_text='Укажите имя',
         validators=(only_letters_validator,)
     )
     last_name = models.CharField(
-        max_length=settings.MAX_LENGTH_LIMITS['user']['last_name'],
+        max_length=settings.MAX_LENGTH_LIMITS['user'],
         verbose_name='Фамилия',
         help_text='Укажите фамилию',
         validators=(only_letters_validator,)
     )
     password = models.CharField(
-        max_length=settings.MAX_LENGTH_LIMITS['user']['password'],
+        max_length=settings.MAX_LENGTH_LIMITS['user'],
         verbose_name='Пароль',
         help_text='Укажите пароль'
     )
@@ -40,16 +42,16 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
     def __str__(self):
         return (
             f'{self.username} '
             f'({self.first_name} {self.last_name}) '
             f'с email: {self.email}'
         )
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
 
 
 class Follow(models.Model):

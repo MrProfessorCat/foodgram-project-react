@@ -6,7 +6,6 @@ from django.http import HttpResponse
 
 from rest_framework import status, viewsets, filters, views
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly, SAFE_METHODS
 )
@@ -24,6 +23,7 @@ from .permissions import (
     IsAdminOrReadOnly, IsAdminAuthorOrReadOnly
 )
 from .filters import RecipeFilter
+from .paginator import PageNumberPagination
 
 
 User = get_user_model()
@@ -126,10 +126,7 @@ class ExtraAction:
 
 class SubscribtionsView(views.APIView):
     def get(self, request):
-        limit = request.query_params.get('limit')
         paginator = PageNumberPagination()
-        if limit and limit.isdigit() and int(limit) > 0:
-            paginator.page_size = limit
         page = paginator.paginate_queryset(
             User.objects.prefetch_related('recipes').filter(
                 followings__user=self.request.user).order_by('pk'),

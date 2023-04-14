@@ -4,36 +4,25 @@ from recipes.models import Recipe
 
 class RecipeFilter(FilterSet):
     is_favorited = filters.BooleanFilter(
-        method='get_queryset_favorited'
+        method='get_queryset'
     )
     is_in_shopping_cart = filters.BooleanFilter(
-        method='get_queryset_shopping_cart'
+        method='get_queryset'
     )
 
-    def get_queryset_favorited(self, queryset, name, value):
-        if self.request.user.is_authenticated:
-            is_favorited = self.request.query_params.get(name)
-            if is_favorited is not None and is_favorited == '1':
-                queryset = queryset.filter(
-                    favourite__user=self.request.user
-                )
-            if is_favorited is not None and is_favorited == '0':
-                queryset = queryset.exclude(
-                    favourite__user=self.request.user
-                )
-        return queryset
+    def get_queryset(self, queryset, name, value):
+        user = self.request.user
+        if user.is_authenticated:
+            if name == 'is_favorited':
+                list_of_recipes_ids = user.favourite.values('recipe_id')
+            if name == 'is_in_shopping_cart':
+                list_of_recipes_ids = user.shoppingcart.values('recipe_id')
 
-    def get_queryset_shopping_cart(self, queryset, name, value):
-        if self.request.user.is_authenticated:
-            is_in_shopping_cart = self.request.query_params.get(name)
-            if is_in_shopping_cart is not None and is_in_shopping_cart == '1':
-                queryset = queryset.filter(
-                    shoppingcart__user=self.request.user
-                )
-            if is_in_shopping_cart is not None and is_in_shopping_cart == '0':
-                queryset = queryset.exclude(
-                    shoppingcart__user=self.request.user
-                )
+            query_param = self.request.query_params.get(name)
+            if query_param == '1':
+                queryset = queryset.filter(id__in=list_of_recipes_ids)
+            if query_param == '0':
+                queryset = queryset.exclude(id__in=list_of_recipes_ids)
         return queryset
 
     class Meta:

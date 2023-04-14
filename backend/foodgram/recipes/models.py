@@ -6,6 +6,7 @@ from django.db import models
 from django.conf import settings
 
 from .validators import validate_tag_color
+from users.validators import only_letters_validator
 
 
 User = get_user_model()
@@ -15,8 +16,10 @@ class Tag(models.Model):
     name = models.CharField(
         max_length=settings.MAX_LENGTH_LIMITS['tag']['name'],
         unique=True,
+        error_messages={'unique': 'Тег с таким названием уже есть'},
         verbose_name='Название',
-        help_text='Введите название тега'
+        help_text='Введите название тега',
+        validators=(only_letters_validator,)
     )
     color = models.CharField(
         max_length=settings.MAX_LENGTH_LIMITS['tag']['color'],
@@ -31,6 +34,10 @@ class Tag(models.Model):
         help_text='Введите slug'
     )
 
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
     def __str__(self) -> str:
         return self.name
 
@@ -38,26 +45,21 @@ class Tag(models.Model):
         self.color = self.color.lower()
         return super().clean()
 
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-
 
 class Ingredient(models.Model):
     name = models.CharField(
         max_length=settings.MAX_LENGTH_LIMITS['ingredient']['name'],
+        validators=(only_letters_validator,),
         verbose_name='Название',
         help_text='Введите название ингредиента'
     )
     measurement_unit = models.CharField(
         max_length=settings.MAX_LENGTH_LIMITS[
             'ingredient']['measurement_unit'],
+        validators=(only_letters_validator,),
         verbose_name='Единица измерения',
         help_text='Укажите единицу измерения'
     )
-
-    def __str__(self) -> str:
-        return f'{self.name} ({self.measurement_unit})'
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -68,6 +70,9 @@ class Ingredient(models.Model):
                 name='unique_ingredient'),
         )
 
+    def __str__(self) -> str:
+        return f'{self.name} ({self.measurement_unit})'
+
 
 class Recipe(models.Model):
     created = models.DateTimeField(
@@ -77,6 +82,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         max_length=settings.MAX_LENGTH_LIMITS['recipe']['name'],
+        validators=(only_letters_validator,),
         verbose_name='Название',
         help_text='Введите название рецепта'
     )
@@ -108,13 +114,13 @@ class Recipe(models.Model):
         validators=(MinValueValidator(1), MaxValueValidator(300))
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('-created',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
 
 
 class IngredientAmount(models.Model):
@@ -156,7 +162,8 @@ class Favourite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='+'
     )
 
     class Meta:
@@ -182,7 +189,8 @@ class ShoppingCart(models.Model):
         Recipe,
         verbose_name='Рецепт',
         help_text='Выберите рецепт, который хотите добавить в список',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='+'
     )
 
     class Meta:

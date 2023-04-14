@@ -1,0 +1,12 @@
+asgiref==3.2.10
+Django
+djangorestframework==3.12.4
+djangorestframework-simplejwt==4.7.2
+pytz==2021.1
+djoser
+Pillow==8.3.1
+django-filter
+drf-extra-fields
+psycopg2-binary==2.8.6
+python-dotenv
+gunicorn==20.0.4
