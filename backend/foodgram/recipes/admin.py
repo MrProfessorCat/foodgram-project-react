@@ -33,8 +33,8 @@ class IngredientAdmin(admin.ModelAdmin):
 #     list_filter = ('name', 'author__username', 'tags')
 #     filter_vertical = ('tags',)
 
-#     def num_favourite(self, obj):
-#         return obj.favourite.count()
+    def num_favourite(self, obj):
+        return Favourite.objects.filter(recipe=obj).count()
 
 
 @admin.register(Favourite)

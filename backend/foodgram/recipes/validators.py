@@ -8,7 +8,7 @@ def validate_tag_color(value):
         raise ValidationError(
             'color должен иметь тип str'
         )
-    if not re.match(r'#[\da-f]{6}', value.lower()):
+    if not re.fullmatch(r'#[\da-f]{3}|#[\da-f]{6}', value.lower()):
         raise ValidationError(
             'color должен иметь HEX формат'
         )

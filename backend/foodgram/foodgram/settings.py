@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-z5e@sp&@x+flk6)efi(s-+mqj^xix-3^ov^_*xm-(98d-gj^rz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -81,10 +85,23 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv(
+            'DB_ENGINE', default='django.db.backends.postgresql'
+        ),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
 
@@ -126,6 +143,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -139,23 +160,37 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.paginator.PageNumberPagination',
     'PAGE_SIZE': 10
 }
 
-AUTH_USER_MODEL = 'users.CustomUser'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+AUTH_USER_MODEL = 'users.User'
 
 DJOSER = {
     'HIDE_USERS': False,
     'PERMISSIONS': {
-        'user_create': ['users.permissions.CreateUserPermissions'],
         'user_list': ['api.permissions.IsAdminAuthorOrReadOnly'],
-        'user': ['api.permissions.IsAuthenticatedAdminAuthorOrReadOnly'],
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
     },
     'SERIALIZERS': {
-        'current_user': 'api.serializers.CustomUserSerializer'
+        'user': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer'
+    }
+}
+
+
+MAX_LENGTH_LIMITS = {
+    'user': 150,
+    'tag': {
+        'name': 200,
+        'color': 7,
+        'slug': 200
+    },
+    'ingredient': {
+        'name': 200,
+        'measurement_unit': 200
+    },
+    'recipe': {
+        'name': 200
     }
 }
