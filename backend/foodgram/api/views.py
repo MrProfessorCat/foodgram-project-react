@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.search import SearchQuery
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
@@ -150,17 +151,16 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.order_by('pk')
     serializer_class = TagSerializer
     pagination_class = None
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class RecipeViewSet(viewsets.ModelViewSet, ExtraAction):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAdminAuthorOrReadOnly)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    queryset = Recipe.objects.all()
 
     def get_queryset(self):
-        queryset = Recipe.objects.select_related('author').order_by('created')
+        queryset = Recipe.objects.select_related('author').order_by('-created')
 
         author = self.request.query_params.get('author')
         if author:
@@ -169,6 +169,7 @@ class RecipeViewSet(viewsets.ModelViewSet, ExtraAction):
         tags = self.request.query_params.getlist('tags')
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -225,10 +226,15 @@ class RecipeViewSet(viewsets.ModelViewSet, ExtraAction):
         return response
 
 
-class IngredientViewSet(viewsets.ModelViewSet):
-    queryset = Ingredient.objects.order_by('pk')
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
+
+    def get_queryset(self):
+        name = self.request.query_params.get('name')
+        if name:
+            return Ingredient.objects.filter(name__startswith=name)
+        return Ingredient.objects.order_by('pk')

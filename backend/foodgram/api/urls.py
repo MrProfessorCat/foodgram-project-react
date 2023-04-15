@@ -7,6 +7,8 @@ from .views import (
     SubscribtionsView, SubscribeView
 )
 
+app_name = 'api'
+
 router = DefaultRouter()
 router.register('tags', TagViewSet, basename='tags')
 router.register('recipes', RecipeViewSet, basename='recipes')

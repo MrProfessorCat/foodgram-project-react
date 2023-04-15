@@ -1,8 +1,0 @@
-Django
-djangorestframework==3.12.4
-djangorestframework-simplejwt==4.7.2
-pytz==2021.1
-djoser
-Pillow==8.3.1
-django-filter
-drf-extra-fields
