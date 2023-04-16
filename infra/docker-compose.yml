@@ -13,8 +13,8 @@ services:
     image: impulseself/foodgram_backend:latest
     restart: always
     volumes:
-      - static_value:/foodgram/static/
-      - media_value:/foodgram/media/
+      - static_value:/app/static/
+      - media_value:/app/media/
     depends_on:
       - db
     env_file:
@@ -23,7 +23,7 @@ services:
   frontend:
     image: impulseself/foodgram_frontend:latest
     volumes:
-      - ../frontend/:/foodgram/result_build/
+      - ../frontend/:/app/result_build/
     depends_on:
       - backend
 
