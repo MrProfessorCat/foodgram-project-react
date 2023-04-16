@@ -11,7 +11,7 @@ services:
       - 5432:5432
     
   backend:
-    container_name: foodgram_foodgram_backend
+    container_name: foodgram_backend
     image: impulseself/foodgram_backend:latest
     restart: always
     volumes:
