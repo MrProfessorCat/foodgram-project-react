@@ -5,7 +5,7 @@ from django.core.validators import (
 from django.db import models
 from django.conf import settings
 
-from .validators import validate_tag_color
+from .validators import validate_tag_color, validate_measurement
 from users.validators import only_letters_validator
 
 
@@ -56,7 +56,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         max_length=settings.MAX_LENGTH_LIMITS[
             'ingredient']['measurement_unit'],
-        validators=(only_letters_validator,),
+        validators=(validate_measurement,),
         verbose_name='Единица измерения',
         help_text='Укажите единицу измерения'
     )
