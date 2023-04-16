@@ -41,6 +41,7 @@ jobs:
             mkdir -p /home/andrey/foodgram && cd $_
             sudo docker compose stop
             sudo docker compose rm foodgram_backend
+            rm -f .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
