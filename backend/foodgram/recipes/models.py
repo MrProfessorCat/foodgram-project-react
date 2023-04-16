@@ -103,7 +103,6 @@ class Recipe(models.Model):
         help_text='Добавьте теги'
     )
     image = models.ImageField(
-        upload_to='posts/',
         blank=True,
         verbose_name='Картинка к рецепту',
         help_text='Добавьте картинку к посту'
