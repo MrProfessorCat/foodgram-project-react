@@ -18,20 +18,20 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-# class IngredientAmountAdmin(admin.TabularInline):
-#     model = IngredientAmount
-#     autocomplete_fields = ('ingredient',)
+class IngredientAmountAdmin(admin.TabularInline):
+    model = IngredientAmount
+    autocomplete_fields = ('ingredient',)
 
 
-# @admin.register(Recipe)
-# class RecipeAdmin(admin.ModelAdmin):
-#     inlines = (IngredientAmountAdmin,)
-#     list_display = (
-#         'id', 'name', 'author', 'text', 'created', 'num_favourite'
-#     )
-#     search_fields = ('name', 'author__username', 'tags')
-#     list_filter = ('name', 'author__username', 'tags')
-#     filter_vertical = ('tags',)
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    inlines = (IngredientAmountAdmin,)
+    list_display = (
+        'id', 'name', 'author', 'text', 'created', 'num_favourite'
+    )
+    search_fields = ('name', 'author__username', 'tags')
+    list_filter = ('name', 'author__username', 'tags')
+    filter_vertical = ('tags',)
 
     def num_favourite(self, obj):
         return Favourite.objects.filter(recipe=obj).count()
