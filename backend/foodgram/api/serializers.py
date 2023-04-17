@@ -151,7 +151,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 class RecipePostSerializer(serializers.ModelSerializer):
     ingredients = IngredientPostSerializer(many=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
-    image = Base64ImageField(required=False, allow_null=False, use_url=True)
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
