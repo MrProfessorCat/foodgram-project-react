@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.search import SearchQuery
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
@@ -21,7 +20,7 @@ from .serializers import (
     UserWithRecipesSerializer
 )
 from .permissions import (
-    IsAdminOrReadOnly, IsAdminAuthorOrReadOnly
+    IsAdminAuthorOrReadOnly
 )
 from .filters import RecipeFilter
 from .paginator import PageNumberPagination
@@ -231,7 +230,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    search_fields = ('@name',)
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
