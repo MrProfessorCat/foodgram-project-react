@@ -11,7 +11,7 @@ def validate_tag_color(value):
 
 
 def validate_ingredient(value):
-    if not re.fullmatch(r'[А-яёA-z- )(.]+', value):
+    if not re.fullmatch(r'[А-яA-z- )(.]+', value):
         raise ValidationError(
             (
                 'Поле measurement_unit должно состоять из '
