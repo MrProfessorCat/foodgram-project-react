@@ -11,10 +11,11 @@ def validate_tag_color(value):
 
 
 def validate_ingredient(value):
-    if not re.fullmatch(r'[А-яA-z- )(.]+', value):
+    if not re.fullmatch(r'[А-яA-z-%0-9 )(.]+', value):
         raise ValidationError(
             (
                 'Поле measurement_unit должно состоять из '
-                'русских, английских букв, скобок точки и тире'
+                'русских, английских букв, скобок точки и тире, '
+                'цифр и знака процента'
             )
         )
