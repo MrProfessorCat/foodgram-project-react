@@ -137,3 +137,5 @@ dmypy.json
 
 backend/foodgram/static/
 backend/foodgram/media/
+backend/foodgram/recipes/migrations/
+backend/foodgram/users/migrations/

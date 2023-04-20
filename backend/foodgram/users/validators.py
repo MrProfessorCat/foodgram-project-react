@@ -11,3 +11,10 @@ def only_letters_validator(value):
                 'русского или английского алфавита или -'
             )
         )
+
+
+def username_validator(value):
+    if value.lower() == 'me':
+        raise ValidationError(
+            f'username не может быть "{value}"'
+        )

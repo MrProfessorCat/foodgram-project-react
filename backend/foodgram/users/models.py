@@ -3,7 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.conf import settings
 
-from .validators import only_letters_validator
+from .validators import only_letters_validator, username_validator
 
 
 class User(AbstractUser):
@@ -11,7 +11,7 @@ class User(AbstractUser):
         max_length=settings.MAX_LENGTH_LIMITS['user'],
         unique=True,
         error_messages={'unique': 'Пользователь с таким username уже есть'},
-        validators=(UnicodeUsernameValidator,),
+        validators=(UnicodeUsernameValidator, username_validator),
         verbose_name='Никнейм пользователя',
         help_text='Укажите никнейм'
     )

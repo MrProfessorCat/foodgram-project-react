@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.forms import ModelForm
 
 from .models import (
     Tag, Ingredient, Recipe, IngredientAmount, Favourite,
@@ -21,6 +22,8 @@ class IngredientAdmin(admin.ModelAdmin):
 class IngredientAmountAdmin(admin.TabularInline):
     model = IngredientAmount
     autocomplete_fields = ('ingredient',)
+    extra = 1
+    min_num = 1
 
 
 @admin.register(Recipe)
